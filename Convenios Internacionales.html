@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convenios Internacionales — Universidad Autónoma del Perú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style>
+:root{--or:#FF6A00;--or-d:#E55E00;--bg:#EEF0F6;--land:#B8C0DE;--ink:#1B1B1F;--mut:#5B6075;--line:#DCE0EC;--lav:#CFCBF7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--or);text-decoration:none}a:hover{color:var(--or-d)}
+button{font:inherit;cursor:pointer}
+header{background:#fff;box-shadow:0 2px 10px rgba(30,40,80,.06);position:sticky;top:0;z-index:10}
+.nav{max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;color:var(--or);font-weight:800;font-size:13px;line-height:1.1;letter-spacing:.02em;margin-right:auto}
+.logo i{display:block;width:14px;height:34px;background:var(--or);transform:skewX(-18deg);border-radius:2px}
+.links{display:flex;gap:22px;font-size:13px;font-weight:600;align-items:center;flex-wrap:wrap}
+.links span::after{content:" ⌄";color:var(--or)}
+.btn-soy{background:var(--lav);color:var(--or);padding:8px 16px;border-radius:4px;font-weight:700;font-size:13px}
+.btn-portal{border:1px solid var(--or);color:var(--or);padding:8px 12px;border-radius:2px;font-weight:700;font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:40px 32px 64px}
+h1{display:flex;justify-content:center;align-items:center;gap:22px;font-size:clamp(26px,3vw,34px);font-weight:700;text-align:center}
+h1::before,h1::after{content:"";width:6px;height:16px;background:var(--or);transform:skewX(-25deg);border-radius:1px}
+.lead{text-align:center;color:var(--mut);margin:12px auto 0;max-width:560px;font-size:16px;line-height:1.5;text-wrap:pretty}
+.step{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--or);margin:36px 0 14px;text-align:center}
+.careers{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:980px;margin:0 auto}
+.chip{background:#fff;border:1px solid transparent;border-radius:8px;padding:12px 18px;font-size:14px;font-weight:700;color:var(--ink);transition:.15s}
+.chip:hover{border-color:var(--or)}
+.chip[aria-pressed=true]{background:var(--or);color:#fff;border-color:var(--or)}
+.summary{text-align:center;margin-top:26px;font-size:16px;color:var(--mut);min-height:24px}
+.summary b{color:var(--ink)}
+.mapwrap{position:relative;margin-top:8px}
+#map{width:100%;height:auto;display:block}
+.country{fill:var(--land);stroke:var(--bg);stroke-width:.5;transition:fill .25s}
+.country.on{fill:var(--or);cursor:pointer}
+.country.on:hover,.country.sel{fill:var(--or-d)}
+.country.dim{fill:#CDD3E8}
+.pin{cursor:pointer}
+.pin circle{fill:#fff;stroke:var(--or);stroke-width:2;transition:r .2s}
+.pin text{font-size:11px;font-weight:800;fill:var(--or);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.pin.sel circle{fill:var(--ink);stroke:#fff}.pin.sel text{fill:#fff}
+.tip{position:absolute;pointer-events:none;background:#fff;border-radius:6px;padding:10px 14px;box-shadow:0 6px 20px rgba(30,40,80,.14);font-size:12px;min-width:170px;opacity:0;transform:translate(-50%,calc(-100% - 14px));transition:opacity .12s}
+.tip h4{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px}
+.tip img{width:18px;border-radius:2px}
+.tip li{list-style:none;color:var(--mut);line-height:1.6}
+.legend{display:flex;gap:20px;justify-content:center;font-size:13px;color:var(--mut);margin-top:4px}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:14px;height:14px;border-radius:3px;display:block}
+.list-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:48px 0 18px}
+.list-head h2{font-size:24px;font-weight:700}
+.clear{background:none;border:none;color:var(--or);font-weight:700;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.group{background:#fff;border-radius:10px;padding:22px 22px 8px;border:1px solid transparent;transition:border-color .2s}
+.group.sel{border-color:var(--or)}
+.group h3{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.group h3 img{width:24px;border-radius:2px}
+.group h3 small{margin-left:auto;font-size:12px;color:var(--mut);font-weight:600}
+.uni{padding:14px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
+.uni:last-child{border-bottom:none}
+.uni b{font-size:15px}
+.uni .meta{font-size:13px;color:var(--mut);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tag{font-size:11px;font-weight:700;color:var(--or);background:#FFF0E5;padding:3px 8px;border-radius:20px}
+.empty{background:#fff;border-radius:10px;padding:40px;text-align:center;color:var(--mut)}
+.cta{margin-top:56px;background:var(--ink);color:#fff;border-radius:14px;padding:44px 48px;display:grid;grid-template-columns:minmax(0,1.4fr) auto;gap:32px;align-items:center;position:relative;overflow:hidden}
+.cta::after{content:"";position:absolute;right:-40px;top:-30px;width:120px;height:260px;background:var(--or);transform:skewX(-22deg);opacity:.9}
+.cta h2{font-size:clamp(24px,2.6vw,30px);line-height:1.2;text-wrap:pretty}
+.cta h2 em{font-style:normal;color:var(--or)}
+.cta p{color:#C9CCD8;margin-top:10px;line-height:1.5;max-width:520px}
+.cta-btns{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1;margin-right:90px}
+.b1{background:var(--or);color:#fff;border:none;padding:15px 26px;border-radius:8px;font-weight:800;font-size:15px}
+.b1:hover{background:var(--or-d)}
+.b2{background:transparent;color:#fff;border:1px solid #fff;padding:15px 22px;border-radius:8px;font-weight:700;font-size:15px}
+@media(max-width:1000px){.links{display:none}}
+@media(max-width:760px){.cta{grid-template-columns:1fr;padding:32px 26px}.cta::after{display:none}.cta-btns{margin-right:0}.links{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <div class="logo"><div>UNIVERSIDAD<br>AUTÓNOMA DEL PERÚ</div><i></i></div>
+    <nav class="links"><span>Sobre UA</span><span>Modalidades</span><span>Carreras</span><span>Admisión</span><a style="color:inherit">Posgrado</a></nav>
+    <a class="btn-soy">Soy UA</a><a class="btn-portal">Portal del estudiante</a>
+  </div>
+</header>
+
+<main>
+  <h1>Convenios Internacionales</h1>
+  <p class="lead">Elige tu carrera y descubre en qué países y universidades puedes hacer tu intercambio.</p>
+
+  <div class="step">1 · Selecciona tu carrera</div>
+  <div class="careers" id="careers"></div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="mapwrap">
+    <svg id="map" viewBox="0 0 960 470" role="img" aria-label="Mapa de convenios internacionales"></svg>
+    <div class="tip" id="tip"></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--or)"></i>Con convenio para tu carrera</span>
+    <span><i style="background:var(--land)"></i>Sin convenio</span>
+  </div>
+
+  <div class="list-head">
+    <h2 id="listTitle">Universidades</h2>
+    <button class="clear" id="clear" hidden>Ver todos los países</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <section class="cta">
+    <div style="position:relative;z-index:1">
+      <h2 id="ctaTitle">¿Ya encontraste tu destino? <em>Postula a la movilidad 2027-I.</em></h2>
+      <p>Un asesor de la Oficina de Internacionalización revisa contigo requisitos, plazos y convalidación de cursos.</p>
+    </div>
+    <div class="cta-btns">
+      <button class="b1">Agenda tu asesoría</button>
+      <button class="b2">Ver requisitos</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const CAREERS=["Todas","Administración","Contabilidad","Derecho","Psicología","Enfermería","Ciencias de la Comunicación","Arquitectura","Ingeniería de Sistemas","Ingeniería Industrial","Ingeniería Civil"];
+const COUNTRIES={
+  "724":{name:"España",iso:"es",ll:[-3.7,40.2]},
+  "840":{name:"Estados Unidos",iso:"us",ll:[-98,39]},
+  "380":{name:"Italia",iso:"it",ll:[12.5,42.8]},
+  "484":{name:"México",iso:"mx",ll:[-102,23.5]},
+  "170":{name:"Colombia",iso:"co",ll:[-73.5,4.5]},
+  "218":{name:"Ecuador",iso:"ec",ll:[-78.4,-1.4]},
+  "076":{name:"Brasil",iso:"br",ll:[-51,-10]},
+  "152":{name:"Chile",iso:"cl",ll:[-71.5,-27]},
+  "032":{name:"Argentina",iso:"ar",ll:[-64,-38]},
+  "858":{name:"Uruguay",iso:"uy",ll:[-56,-32.8]}
+};
+const UNIS=[
+  {c:"724",n:"Universidad de Salamanca",city:"Salamanca",t:"Intercambio semestral",k:["Derecho","Psicología","Ciencias de la Comunicación","Administración"]},
+  {c:"724",n:"Universitat Politècnica de València",city:"Valencia",t:"Intercambio semestral",k:["Ingeniería de Sistemas","Ingeniería Industrial","Arquitectura","Ingeniería Civil"]},
+  {c:"724",n:"Universidad de Granada",city:"Granada",t:"Pasantía",k:["Enfermería","Psicología","Contabilidad"]},
+  {c:"840",n:"Michigan State University",city:"East Lansing",t:"Intercambio semestral",k:["Administración","Ingeniería de Sistemas","Ciencias de la Comunicación"]},
+  {c:"380",n:"Università di Bologna",city:"Bolonia",t:"Intercambio semestral",k:["Derecho","Arquitectura","Administración"]},
+  {c:"380",n:"Politecnico di Milano",city:"Milán",t:"Doble titulación",k:["Arquitectura","Ingeniería Civil","Ingeniería Industrial"]},
+  {c:"484",n:"Universidad Nacional Autónoma de México",city:"Ciudad de México",t:"Intercambio semestral",k:["Derecho","Psicología","Ciencias de la Comunicación","Enfermería"]},
+  {c:"484",n:"Tecnológico de Monterrey",city:"Monterrey",t:"Intercambio semestral",k:["Administración","Ingeniería Industrial","Ingeniería de Sistemas","Contabilidad"]},
+  {c:"170",n:"Universidad Nacional de Colombia",city:"Bogotá",t:"Intercambio semestral",k:["Ingeniería Civil","Enfermería","Arquitectura"]},
+  {c:"170",n:"Universidad EAFIT",city:"Medellín",t:"Intercambio semestral",k:["Administración","Contabilidad","Ingeniería de Sistemas"]},
+  {c:"218",n:"Universidad San Francisco de Quito",city:"Quito",t:"Pasantía",k:["Ciencias de la Comunicación","Psicología"]},
+  {c:"076",n:"Universidade de São Paulo",city:"São Paulo",t:"Intercambio semestral",k:["Ingeniería Civil","Ingeniería Industrial","Enfermería"]},
+  {c:"152",n:"Pontificia Universidad Católica de Chile",city:"Santiago",t:"Intercambio semestral",k:["Derecho","Psicología","Ingeniería de Sistemas"]},
+  {c:"032",n:"Universidad de Buenos Aires",city:"Buenos Aires",t:"Intercambio semestral",k:["Derecho","Psicología","Contabilidad","Arquitectura"]},
+  {c:"858",n:"Universidad de la República",city:"Montevideo",t:"Pasantía",k:["Enfermería","Ciencias de la Comunicación","Administración"]}
+];
+const flag=iso=>`https://flagcdn.com/w40/${iso}.png`;
+let career=localStorage.getItem("ua-career")||"Todas", selCountry=null;
+
+const careersEl=document.getElementById("careers");
+CAREERS.forEach(c=>{const b=document.createElement("button");b.className="chip";b.textContent=c;b.onclick=()=>{career=c;selCountry=null;localStorage.setItem("ua-career",c);update()};careersEl.appendChild(b)});
+
+const svg=d3.select("#map"),tip=document.getElementById("tip");
+const proj=d3.geoNaturalEarth1().scale(175).translate([470,265]),path=d3.geoPath(proj);
+const gLand=svg.append("g"),gPins=svg.append("g");
+let countryPaths;
+
+function matching(){return UNIS.filter(u=>career==="Todas"||u.k.includes(career))}
+function byCountry(list){const m={};list.forEach(u=>(m[u.c]=m[u.c]||[]).push(u));return m}
+
+function showTip(id,evt){
+  const list=byCountry(matching())[id];if(!list)return;
+  const r=document.querySelector(".mapwrap").getBoundingClientRect();
+  tip.innerHTML=`<h4><img src="${flag(COUNTRIES[id].iso)}" alt="">${COUNTRIES[id].name}</h4><ul>${list.map(u=>`<li>${u.n}</li>`).join("")}</ul>`;
+  tip.style.left=(evt.clientX-r.left)+"px";tip.style.top=(evt.clientY-r.top)+"px";tip.style.opacity=1;
+}
+const hideTip=()=>tip.style.opacity=0;
+function pick(id){selCountry=selCountry===id?null:id;update();
+  const top=document.getElementById("grid").getBoundingClientRect().top+window.scrollY-120;window.scrollTo({top,behavior:"smooth"})}
+
+function update(){
+  [...careersEl.children].forEach(b=>b.setAttribute("aria-pressed",b.textContent===career));
+  const list=matching(),bc=byCountry(list),ids=Object.keys(bc);
+  const cname=career==="Todas"?"todas las carreras":career;
+  document.getElementById("summary").innerHTML=list.length
+    ?`<b>${list.length} universidades</b> en <b>${ids.length} países</b> para ${career==="Todas"?"todas las carreras":"<b>"+career+"</b>"}`
+    :`Aún no tenemos convenios para ${cname}.`;
+  if(countryPaths)countryPaths.attr("class",d=>"country"+(bc[d.id]?" on":"")+(d.id===selCountry?" sel":""));
+  const pins=gPins.selectAll(".pin").data(ids,d=>d);
+  pins.exit().remove();
+  const pe=pins.enter().append("g").attr("class","pin")
+    .attr("transform",d=>`translate(${proj(COUNTRIES[d].ll)})`)
+    .on("mousemove",(e,d)=>showTip(d,e)).on("mouseleave",hideTip).on("click",(e,d)=>pick(d));
+  pe.append("circle").attr("r",11);pe.append("text");
+  gPins.selectAll(".pin").classed("sel",d=>d===selCountry).select("text").text(d=>bc[d].length);
+
+  const shown=selCountry?[selCountry]:ids;
+  document.getElementById("listTitle").textContent=selCountry
+    ?`Universidades en ${COUNTRIES[selCountry].name}`:(career==="Todas"?"Todas las universidades":`Universidades para ${career}`);
+  document.getElementById("clear").hidden=!selCountry;
+  const grid=document.getElementById("grid");
+  grid.innerHTML=shown.length?shown.map(id=>`
+    <div class="group${id===selCountry?" sel":""}">
+      <h3><img src="${flag(COUNTRIES[id].iso)}" alt="">${COUNTRIES[id].name}<small>${bc[id].length} ${bc[id].length>1?"convenios":"convenio"}</small></h3>
+      ${bc[id].map(u=>`<div class="uni"><b>${u.n}</b><div class="meta">${u.city}<span class="tag">${u.t}</span></div></div>`).join("")}
+    </div>`).join(""):`<div class="empty">No hay convenios disponibles para esta carrera todavía.</div>`;
+  grid.style.gridTemplateColumns=selCountry?"minmax(0,1fr)":"";
+  document.getElementById("ctaTitle").innerHTML=career==="Todas"
+    ?`¿Ya encontraste tu destino? <em>Postula a la movilidad 2027-I.</em>`
+    :`¿Estudias ${career}? <em>Postula a la movilidad 2027-I.</em>`;
+}
+document.getElementById("clear").onclick=()=>{selCountry=null;update()};
+
+fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json").then(r=>r.json()).then(topo=>{
+  const feats=topojson.feature(topo,topo.objects.countries).features.filter(f=>f.id!=="010");
+  countryPaths=gLand.selectAll("path").data(feats).join("path").attr("d",path)
+    .on("mousemove",(e,d)=>showTip(d.id,e)).on("mouseleave",hideTip)
+    .on("click",(e,d)=>{if(byCountry(matching())[d.id])pick(d.id)});
+  update();
+});
+update();
+</script>
+</body>
+</html>
